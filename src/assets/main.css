@@ -1,0 +1,152 @@
+@import 'tailwindcss';
+
+/* ============================================
+   TEMA DARK/TECH — Portfolio Arthur Furtunato
+   Tailwind v4: tema definido via @theme
+   ============================================ */
+
+@theme {
+  /* Cores do portfólio */
+  --color-neon-green: #00ff87;
+  --color-neon-cyan: #00d4ff;
+  --color-neon-purple: #bf5af2;
+  --color-dark-bg: #0a0a0f;
+  --color-dark-surface: #12121a;
+  --color-dark-card: #1a1a26;
+  --color-dark-border: #1e1e2e;
+  --color-dark-text: #e2e8f0;
+  --color-dark-muted: #94a3b8;
+
+  /* Tipografia */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Animações */
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+  --animate-blink: blink 1s step-end infinite;
+  --animate-slide-up: slide-up 0.6s ease-out forwards;
+  --animate-fade-in: fade-in 0.5s ease-out forwards;
+}
+
+/* ============================================
+   KEYFRAMES
+   ============================================ */
+
+@keyframes glow {
+  from {
+    box-shadow:
+      0 0 10px var(--color-neon-green),
+      0 0 20px var(--color-neon-green);
+  }
+  to {
+    box-shadow:
+      0 0 20px var(--color-neon-green),
+      0 0 40px var(--color-neon-green),
+      0 0 80px var(--color-neon-green);
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   RESET & BASE
+   Envolvido em @layer base para que os utilitários
+   do Tailwind (mb-*, p-*, etc.) tenham prioridade.
+   Em Tailwind v4, CSS sem @layer tem precedência
+   sobre utilitários em layers — por isso o reset
+   precisa ficar dentro de um layer.
+   ============================================ */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--color-dark-bg);
+  color: var(--color-dark-text);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  font-size: 16px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+/* ============================================
+   UTILITÁRIOS GLOBAIS
+   ============================================ */
+
+/* Delays de animação para efeito cascata (stagger) no Hero.
+   Tailwind v4 não gera animation-delay automaticamente,
+   então definimos aqui como utilitários customizados. */
+@layer utilities {
+  .delay-anim-100 { animation-delay: 100ms; }
+  .delay-anim-200 { animation-delay: 200ms; }
+  .delay-anim-300 { animation-delay: 300ms; }
+  .delay-anim-400 { animation-delay: 400ms; }
+  .delay-anim-500 { animation-delay: 500ms; }
+  .delay-anim-700 { animation-delay: 700ms; }
+}
+
+/* Scrollbar dark */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-dark-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-dark-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neon-green);
+}
+
+/* Seleção de texto */
+::selection {
+  background: var(--color-neon-green);
+  color: var(--color-dark-bg);
+}
