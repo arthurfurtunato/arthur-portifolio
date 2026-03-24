@@ -1,20 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useWindowScroll } from '@vueuse/core'
-
-// useWindowScroll() — composable do @vueuse/core
-// Retorna refs reativas com a posição atual do scroll.
-// Quando o usuário scrolla, y.value atualiza automaticamente
-// e o Vue re-renderiza os bindings que dependem de y.
+import { storeToRefs } from 'pinia'
+import { useLocaleStore } from '@/stores/locale'
 
 const { y } = useWindowScroll()
-
-// computed() que depende de y: recalcula cada vez que y muda.
-// Se y > 60, o header ganha backdrop-blur (efeito frosted glass).
 const isScrolled = computed(() => y.value > 60)
-
-// ref(false): estado local do menu mobile.
-// Quando muda, o Vue atualiza o v-show no template.
 const mobileMenuOpen = ref(false)
 
 function toggleMenu() {
@@ -25,11 +16,17 @@ function closeMenu() {
   mobileMenuOpen.value = false
 }
 
-const navLinks = [
-  { label: 'Sobre', href: '#sobre' },
-  { label: 'Projetos', href: '#projetos' },
-  { label: 'Experiência', href: '#experiencia' },
-]
+// Locale: storeToRefs para reatividade, toggleLocale direto da store
+const localeStore = useLocaleStore()
+const { locale, currentLocale } = storeToRefs(localeStore)
+const { toggleLocale } = localeStore
+
+// navLinks como computed: atualiza automaticamente quando o idioma muda
+const navLinks = computed(() => [
+  { label: locale.value.nav.about, href: '#sobre' },
+  { label: locale.value.nav.projects, href: '#projetos' },
+  { label: locale.value.nav.experience, href: '#experiencia' },
+])
 </script>
 
 <template>
@@ -45,7 +42,7 @@ const navLinks = [
         arthurfurtunato<span class="animate-blink">_</span>
       </a>
 
-      <!-- Nav desktop — hidden em mobile, flex em md+ -->
+      <!-- Nav desktop -->
       <nav class="hidden md:flex items-center gap-8">
         <a
           v-for="link in navLinks"
@@ -55,6 +52,18 @@ const navLinks = [
         >
           {{ link.label }}
         </a>
+
+        <!-- Toggle de idioma PT | EN -->
+        <button
+          class="font-mono text-xs border border-dark-border rounded px-2 py-1 hover:border-neon-green transition-colors duration-200"
+          :aria-label="currentLocale === 'pt' ? 'Switch to English' : 'Mudar para Português'"
+          @click="toggleLocale"
+        >
+          <span :class="currentLocale === 'pt' ? 'text-neon-green' : 'text-dark-muted'">PT</span>
+          <span class="text-dark-muted mx-1">|</span>
+          <span :class="currentLocale === 'en' ? 'text-neon-green' : 'text-dark-muted'">EN</span>
+        </button>
+
         <a
           href="https://github.com/arthurfurtunato"
           target="_blank"
@@ -66,13 +75,11 @@ const navLinks = [
       </nav>
 
       <!-- Botão hamburger — visível apenas em mobile -->
-      <!-- @click: escuta o evento de clique e chama a função -->
       <button
         class="md:hidden flex flex-col gap-1.5 p-2 text-dark-muted hover:text-neon-green transition-colors"
         aria-label="Menu"
         @click="toggleMenu"
       >
-        <!-- As três linhas do hamburger, com animação de X quando aberto -->
         <span
           class="block w-5 h-0.5 bg-current transition-all duration-300"
           :class="mobileMenuOpen ? 'rotate-45 translate-y-2' : ''"
@@ -88,8 +95,7 @@ const navLinks = [
       </button>
     </div>
 
-    <!-- Menu mobile — v-show: mantém o elemento no DOM mas controla
-         display com CSS. Melhor que v-if para animações. -->
+    <!-- Menu mobile -->
     <div
       v-show="mobileMenuOpen"
       class="md:hidden border-t border-dark-border bg-dark-bg/95 backdrop-blur-md"
@@ -104,6 +110,16 @@ const navLinks = [
         >
           {{ link.label }}
         </a>
+
+        <!-- Toggle de idioma no menu mobile -->
+        <button
+          class="font-mono text-xs border border-dark-border rounded px-2 py-1.5 w-fit hover:border-neon-green transition-colors duration-200"
+          @click="toggleLocale"
+        >
+          <span :class="currentLocale === 'pt' ? 'text-neon-green' : 'text-dark-muted'">PT</span>
+          <span class="text-dark-muted mx-1">|</span>
+          <span :class="currentLocale === 'en' ? 'text-neon-green' : 'text-dark-muted'">EN</span>
+        </button>
       </nav>
     </div>
   </header>

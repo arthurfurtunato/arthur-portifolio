@@ -8,8 +8,12 @@
 //   :texts="array"  → passa o array JavaScript
 //    texts="array"  → passaria a string "array"
 
+import { storeToRefs } from 'pinia'
 import TerminalText from '@/components/ui/TerminalText.vue'
 import NeonButton from '@/components/ui/NeonButton.vue'
+import { useLocaleStore } from '@/stores/locale'
+
+const { locale } = storeToRefs(useLocaleStore())
 </script>
 
 <template>
@@ -23,9 +27,6 @@ import NeonButton from '@/components/ui/NeonButton.vue'
     ></div>
 
     <!-- Conteúdo principal -->
-    <!-- Cada elemento usa animate-slide-up + delay crescente (efeito cascata/stagger):
-         linha terminal → nome → typewriter → descrição → botões
-         opacity é 0 por padrão pois slide-up começa em opacity:0 com fill-mode:forwards -->
     <div class="relative z-10 text-center max-w-3xl">
       <!-- Linha terminal acima do nome -->
       <p class="font-mono text-neon-green text-sm mb-6 opacity-80 animate-slide-up">
@@ -39,38 +40,28 @@ import NeonButton from '@/components/ui/NeonButton.vue'
         Arthur Furtunato
       </h1>
 
-      <!-- Typewriter com roles -->
+      <!-- Typewriter com roles — atualiza quando o idioma muda -->
       <div class="text-xl md:text-2xl mb-8 h-8 animate-slide-up delay-anim-200">
-        <TerminalText
-          :texts="[
-            'Backend Developer',
-            'Aprendendo Vue 3',
-            'Amante de Código Limpo',
-            'Entusiasta de IA',
-          ]"
-        />
+        <TerminalText :texts="locale.hero.roles" />
       </div>
 
       <!-- Descrição curta -->
       <p
         class="text-dark-muted text-lg mb-10 max-w-xl mx-auto leading-relaxed animate-slide-up delay-anim-300"
       >
-        Desenvolvedor backend apaixonado por código limpo, sistemas escaláveis, inteligência
-        artificial e agora explorando o mundo do frontend.
+        {{ locale.hero.description }}
       </p>
 
       <!-- CTAs -->
       <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up delay-anim-400">
-        <NeonButton href="#projetos" variant="primary"> ver projetos </NeonButton>
+        <NeonButton href="#projetos" variant="primary">{{ locale.hero.cta.projects }}</NeonButton>
         <NeonButton href="https://github.com/arthurfurtunato" variant="ghost" target="_blank">
-          github
+          {{ locale.hero.cta.github }}
         </NeonButton>
       </div>
     </div>
 
-    <!-- Seta scroll indicador — dois chevrons empilhados -->
-    <!-- Cada chevron é um quadrado com apenas border-right e border-bottom,
-         rotacionado 45°, formando uma seta apontando para baixo. -->
+    <!-- Seta scroll indicador -->
     <div
       class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce flex flex-col items-center gap-1"
     >

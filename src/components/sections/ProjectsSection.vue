@@ -9,22 +9,40 @@
 
   Com storeToRefs:
     const { filteredProjects } = storeToRefs(store)  ← reativo, atualiza na tela
+
+  Sobre i18n:
+  filteredProjects retorna ProjectData[] (com LocalizedString).
+  O computed `resolvedProjects` converte para Project[] (strings planas)
+  com base no idioma ativo — assim ProjectCard não precisa saber nada
+  sobre localização e continua sendo um primitivo UI puro.
 -->
 <script setup lang="ts">
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useProjectsStore } from '@/stores/projects'
+import { useLocaleStore } from '@/stores/locale'
 import ProjectCard from '@/components/ui/ProjectCard.vue'
 import SectionTitle from '@/components/ui/SectionTitle.vue'
 import { useScrollReveal } from '@/composables/useScrollReveal'
+import type { Project } from '@/types'
 
 const store = useProjectsStore()
 const { el, isVisible } = useScrollReveal({ delay: 100 })
 
-// storeToRefs: extrai refs reativas do estado e computed
 const { filteredProjects, allTechs, activeFilter } = storeToRefs(store)
-
-// Actions são funções normais — não precisam de storeToRefs
 const { setFilter, clearFilter } = store
+
+const { locale, currentLocale } = storeToRefs(useLocaleStore())
+
+// Resolve LocalizedString → string com base no idioma ativo.
+// ProjectCard recebe Project (strings planas) e não precisa mudar.
+const resolvedProjects = computed<Project[]>(() =>
+  filteredProjects.value.map((p) => ({
+    ...p,
+    title: p.title[currentLocale.value],
+    description: p.description[currentLocale.value],
+  })),
+)
 </script>
 
 <template>
@@ -38,14 +56,14 @@ const { setFilter, clearFilter } = store
   >
     <div class="max-w-5xl mx-auto">
       <SectionTitle
-        label="> projetos"
-        title="O que eu construí"
-        subtitle="Principais projetos pessoais e profissionais que mostram minha evolução como desenvolvedor."
+        :label="locale.projects.label"
+        :title="locale.projects.title"
+        :subtitle="locale.projects.subtitle"
       />
 
       <!-- Filtros por tecnologia -->
       <div class="flex flex-wrap gap-2 mb-10">
-        <!-- Botão "Todos" -->
+        <!-- Botão "Todos / All" -->
         <button
           @click="clearFilter"
           :class="[
@@ -55,7 +73,7 @@ const { setFilter, clearFilter } = store
               : 'border-dark-border text-dark-muted hover:border-dark-text hover:text-dark-text',
           ]"
         >
-          todos
+          {{ locale.projects.filterAll }}
         </button>
 
         <button
@@ -74,24 +92,22 @@ const { setFilter, clearFilter } = store
       </div>
 
       <!-- Grid de projetos -->
-      <!--
-        Transição de lista com <TransitionGroup>:
-        - name="projects" gera as classes CSS: projects-enter-active, projects-leave-active etc.
-        - tag="div" define o elemento wrapper do grupo
-        - cada item precisa de :key único para o Vue rastrear as mudanças
-      -->
       <TransitionGroup
         name="projects"
         tag="div"
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
       >
-        <ProjectCard v-for="project in filteredProjects" :key="project.id" :project="project" />
+        <ProjectCard
+          v-for="project in resolvedProjects"
+          :key="project.id"
+          :project="project"
+        />
       </TransitionGroup>
 
       <!-- Estado vazio -->
-      <div v-if="filteredProjects.length === 0" class="text-center py-16 text-dark-muted font-mono">
-        <p class="text-neon-green mb-2">> nenhum projeto encontrado</p>
-        <p class="text-sm">tente outro filtro.</p>
+      <div v-if="resolvedProjects.length === 0" class="text-center py-16 text-dark-muted font-mono">
+        <p class="text-neon-green mb-2">{{ locale.projects.empty.title }}</p>
+        <p class="text-sm">{{ locale.projects.empty.hint }}</p>
       </div>
     </div>
   </section>

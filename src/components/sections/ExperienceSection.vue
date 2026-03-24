@@ -1,20 +1,34 @@
 <!--
   ExperienceSection — linha do tempo de experiências profissionais
 
-  Aqui também usamos a store, mas só acessamos `experiences`
-  que é dados estáticos (não tem filtro), então poderíamos até
-  passar via props. Mas usar a store é mais simples e consistente.
+  Mesma estratégia da ProjectsSection: a store guarda ExperienceData[]
+  (com LocalizedString), e o computed `resolvedExperiences` converte para
+  Experience[] (strings planas) antes de renderizar.
 -->
 <script setup lang="ts">
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useProjectsStore } from '@/stores/projects'
+import { useLocaleStore } from '@/stores/locale'
 import TechBadge from '@/components/ui/TechBadge.vue'
 import SectionTitle from '@/components/ui/SectionTitle.vue'
 import { useScrollReveal } from '@/composables/useScrollReveal'
+import type { Experience } from '@/types'
 
 const store = useProjectsStore()
 const { experiences } = storeToRefs(store)
 const { el, isVisible } = useScrollReveal({ delay: 100 })
+
+const { locale, currentLocale } = storeToRefs(useLocaleStore())
+
+// Resolve LocalizedString → string com base no idioma ativo
+const resolvedExperiences = computed<Experience[]>(() =>
+  experiences.value.map((exp) => ({
+    ...exp,
+    role: exp.role[currentLocale.value],
+    description: exp.description.map((d) => d[currentLocale.value]),
+  })),
+)
 </script>
 
 <template>
@@ -28,9 +42,9 @@ const { el, isVisible } = useScrollReveal({ delay: 100 })
   >
     <div class="max-w-3xl mx-auto">
       <SectionTitle
-        label="> experiência"
-        title="Trajetória profissional"
-        subtitle="Empresas e projetos onde coloquei a mão na massa."
+        :label="locale.experience.label"
+        :title="locale.experience.title"
+        :subtitle="locale.experience.subtitle"
       />
 
       <!-- Linha do tempo -->
@@ -39,7 +53,7 @@ const { el, isVisible } = useScrollReveal({ delay: 100 })
         <div class="absolute left-4 top-0 bottom-0 w-px bg-dark-border"></div>
 
         <div class="flex flex-col gap-10">
-          <article v-for="exp in experiences" :key="exp.id" class="pl-12 relative">
+          <article v-for="exp in resolvedExperiences" :key="exp.id" class="pl-12 relative">
             <!-- Ponto na linha -->
             <div
               class="absolute left-0 top-1 w-8 h-8 rounded-full bg-dark-surface border-2 border-neon-green flex items-center justify-center"
@@ -61,7 +75,6 @@ const { el, isVisible } = useScrollReveal({ delay: 100 })
                 :key="item"
                 class="text-dark-muted text-sm flex gap-2"
               >
-                <!-- Seta terminal antes de cada bullet -->
                 <span class="text-neon-green font-mono shrink-0">›</span>
                 <span>{{ item }}</span>
               </li>

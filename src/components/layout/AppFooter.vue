@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useLocaleStore } from '@/stores/locale'
+
 const year = new Date().getFullYear()
+const { locale } = storeToRefs(useLocaleStore())
 </script>
 
 <template>
@@ -9,7 +13,7 @@ const year = new Date().getFullYear()
         <span class="text-neon-green">©{{ year }}</span> Arthur Furtunato
       </p>
       <p class="font-mono text-dark-muted text-xs">
-        feito com Vue 3 + Tailwind CSS
+        {{ locale.footer.madeWith }}
       </p>
     </div>
   </footer>
